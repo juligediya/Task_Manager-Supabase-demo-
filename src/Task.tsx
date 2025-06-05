@@ -5,14 +5,15 @@ import { addTask, deleteTask, getTasks, updateTask, type Task } from "./APIs";
 import { useQuery } from "@tanstack/react-query";
 import { client } from "./main";
 import { useState } from "react";
-
+import { useAuth } from "./contexts/AuthProvider";
 
 type Inputs = {
   title: string;
   description: string;
+  created_by?: string; // Made optional since it's set programmatically
 };
 
-const Task = () => {
+const Tasks = () => {
   const {
     register,
     handleSubmit,
@@ -20,28 +21,32 @@ const Task = () => {
     setValue,
     reset
   } = useForm<Inputs>();
-  const [isEdit, setIsEdit] = useState(false)
+  const [isEdit, setIsEdit] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+  const { user } = useAuth();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     if (isEdit && editId !== null) {
-      await updateTask(editId, data);
+      await updateTask(editId, { title: data.title, description: data.description });
       alert("Task updated successfully");
     } else {
-      await addTask(data);
+      await addTask({ 
+        title: data.title, 
+        description: data.description, 
+        created_by: user?.id || '' 
+      });
       alert("Task added successfully");
     }
-    reset()
+    reset();
     client.invalidateQueries({ queryKey: ["tasks"] });
     setIsEdit(false);
     setEditId(null);
   };
 
-
   const { data, isPending, error } = useQuery({
     queryKey: ['tasks'],
     queryFn: getTasks
-  })
+  });
 
   const deletetask = async (id: number) => {
     const deleteOneTask = await deleteTask(id);
@@ -49,7 +54,7 @@ const Task = () => {
       alert("Task Deleted successfully");
     }
     client.invalidateQueries({ queryKey: ['tasks'] });
-  }
+  };
 
   const editTask = (task: Task) => {
     setIsEdit(true);
@@ -58,17 +63,22 @@ const Task = () => {
     setValue("description", task.description);
   };
 
-
   if (isPending) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   }
+
+  // Add null check for data
+  if (!data) {
+    return <div>No tasks found</div>;
+  }
+
   return (
     <div className="p-4">
-      <h1 className="mb-4 text-xl font-semibold">Task Manager</h1>
+      <h1 className="mb-4 text-xl font-semibold flex justify-center">Task Manager</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-md mx-auto">
         <div>
           <Input
@@ -110,11 +120,10 @@ const Task = () => {
         </div>
       </form>
 
-
-      <div className="grid grid-cols-3 gap-4  mt-4">
+      <div className="grid grid-cols-3 gap-4 mt-4">
         {data.map((task) => {
           return (
-            <div key={task.id} className="border p-4 mb-4 rounded m-4 ">
+            <div key={task.id} className="border p-4 mb-4 rounded m-4">
               <h3 className="font-semibold">{task.title}</h3>
               <p>{task.description}</p>
               <div className="flex justify-center gap-2 mt-4">
@@ -122,11 +131,11 @@ const Task = () => {
                 <Button variant="default" onClick={() => deletetask(task.id)}>Delete</Button>
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </div>
   );
 };
 
-export default Task;
+export default Tasks;

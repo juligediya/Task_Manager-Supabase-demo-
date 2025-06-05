@@ -1,11 +1,11 @@
-import { supabase } from "./supabase/supabasse-client"
+import { supabase } from "./supabase/supabasse-client";
+
 export type Task = {
   id: number;
   title: string;
   description: string;
-  created_at: string;
+  created_by: string;
 };
-
 
 export async function getTasks(): Promise<Task[]> {
   const { data, error } = await supabase
@@ -21,46 +21,46 @@ export async function getTasks(): Promise<Task[]> {
   return data || [];
 }
 
-export const addTask = async (task: { title: string; description: string }) => {
+export const addTask = async (task: { title: string; description: string; created_by: string }) => {
   const { data, error } = await supabase
     .from("Task")
     .insert(task)
     .select();
 
-     if (error) {
+  if (error) {
     console.error("Error on Adding Task:", error);
     throw error;
   }
 
   return data || []; 
-}
+};
 
-export const deleteTask = async (id:number) => {
+export const deleteTask = async (id: number) => {
   const { data, error } = await supabase
     .from("Task")
     .delete()
     .eq("id", id)
     .select();
 
-     if (error) {
-    console.error("Error on Adding Task:", error);
+  if (error) {
+    console.error("Error on Deleting Task:", error);
     throw error;
   }
 
   return data || []; 
-}
+};
 
-export const updateTask = async (id:number,task: { title: string; description: string }) => {
+export const updateTask = async (id: number, task: { title: string; description: string }) => {
   const { data, error } = await supabase
     .from("Task")
     .update(task)
     .eq("id", id)
     .select();
 
-     if (error) {
-    console.error("Error on Adding Task:", error);
+  if (error) {
+    console.error("Error on Updating Task:", error);
     throw error;
   }
 
   return data || []; 
-}
+};

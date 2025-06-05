@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,12 +45,9 @@ export function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-accent">
       <Card className="w-[400px] shadow-lg border-border">
         <CardHeader className="space-y-4 pb-2">
-          <div className="mx-auto border w-20 h-20 rounded-full flex items-center justify-center mb-2 border-[2px]">
-           <img src="/newlogo.svg" alt="Logo" className="h-12 w-12 dark:invert" />
-
-          </div>
+      
           <CardTitle className="text-center text-2xl font-bold text-foreground">
-            Welcome Back
+            Login
           </CardTitle>
           <p className="text-center text-sm text-muted-foreground">
             Sign in to access your Employee Dashboard

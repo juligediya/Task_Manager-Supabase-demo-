@@ -1,4 +1,3 @@
-
 import { supabase } from "@/supabase/supabasse-client";
 import type { Session } from "@supabase/supabase-js";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
@@ -38,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    let unsubscribe: (() => void) | undefined;
 
     const initializeAuth = async () => {
       try {
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (mounted) {
           updateUserFromSession(session);
           const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
-          return () => subscription.unsubscribe();
+          unsubscribe = () => subscription.unsubscribe();
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
@@ -59,7 +59,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeAuth();
-    return () => { mounted = false; };
+    
+    return () => {
+      mounted = false;
+      unsubscribe?.();
+    };
   }, [updateUserFromSession, handleAuthStateChange]);
 
   const signIn = async (email: string, password: string) => {
@@ -68,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       if (data.session) updateUserFromSession(data.session);
+      navigate("/", { replace: true });
     } catch (error) {
       console.error("Error signing in:", error);
       throw error;
