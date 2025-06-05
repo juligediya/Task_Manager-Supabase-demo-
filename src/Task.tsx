@@ -10,7 +10,7 @@ import { useAuth } from "./contexts/AuthProvider";
 type Inputs = {
   title: string;
   description: string;
-  created_by?: string; // Made optional since it's set programmatically
+  created_by?: string; 
 };
 
 const Tasks = () => {

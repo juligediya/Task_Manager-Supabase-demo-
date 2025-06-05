@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -12,27 +12,30 @@ const LoadingSpinner = () => (
   </div>
 );
 
-export function LoginPage() {
+export function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, loading } = useAuth();
-  
+  const { loading , signUp} = useAuth();
 
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
 
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await signIn(email, password);
+      await signUp(email, password);
+      toast.success("Signup successful! Please check your email to confirm.");
     } catch (error: any) {
-      toast.error(
-         "Error",{
-        description: error?.message || "Invalid credentials",
-       
+      toast.error("Signup failed", {
+        description: error?.message || "Something went wrong",
       });
     } finally {
       setIsSubmitting(false);
@@ -45,16 +48,15 @@ export function LoginPage() {
     <div className="flex items-center justify-center min-h-screen ">
       <Card className="w-[400px] shadow-lg border-border">
         <CardHeader className="space-y-4 pb-2">
-      
           <CardTitle className="text-center text-2xl font-bold text-foreground">
-            Login
+            Sign Up
           </CardTitle>
           <p className="text-center text-sm text-muted-foreground">
-            Sign in to access your Employee Dashboard
+            Create an account to access your Employee Dashboard
           </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSignup} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Email</label>
               <Input
@@ -62,13 +64,12 @@ export function LoginPage() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-11 transition-all duration-200 focus:ring-2 focus:ring-ring"
+                className="h-11"
                 disabled={isSubmitting}
                 required
-                autoComplete="email"
               />
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Password</label>
               <div className="relative">
@@ -77,10 +78,9 @@ export function LoginPage() {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 transition-all duration-200 focus:ring-2 focus:ring-ring pr-10"
+                  className="h-11 pr-10"
                   disabled={isSubmitting}
                   required
-                  autoComplete="current-password"
                 />
                 <button
                   type="button"
@@ -92,21 +92,34 @@ export function LoginPage() {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200"
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Confirm Password</label>
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="h-11"
+                disabled={isSubmitting}
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Signing in...
+                  Signing up...
                 </>
-              ) : 'Sign In'}
+              ) : 'Sign Up'}
             </Button>
-            <div className="flex items-center justify-center"> 
-                <a href="/signup" className="text-sm text-black-800 hover:underline">
-                Don't have an account? Sign Up
+             <div className="flex items-center justify-center"> 
+                <a href="/login" className="text-sm text-black-800 hover:underline">
+                if you have already an account? Sign In
                 </a>
                 </div>
           </form>
