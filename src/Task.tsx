@@ -1,4 +1,4 @@
-import { set, useForm, type SubmitHandler } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { addTask, deleteTask, getTasks, updateTask, type Task } from "./APIs";
