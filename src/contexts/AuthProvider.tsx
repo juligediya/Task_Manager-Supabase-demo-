@@ -1,7 +1,7 @@
 import { supabase } from "@/supabase/supabasse-client";
 import type { Session } from "@supabase/supabase-js";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 
 type UserType = {
   id: string;
@@ -14,6 +14,9 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  handleLogin: () => Promise<void>;
+  signInWithGithub: () => Promise<void>;
+  updateUserFromSession: (session: Session | null) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,7 +36,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const handleAuthStateChange = useCallback((event: string, session: Session | null) => {
     updateUserFromSession(session);
-    if (event === "SIGNED_OUT") navigate("/login", { replace: true });
+    if (event === "SIGNED_OUT") {
+      navigate("/login", { replace: true });
+    } else if (event === "SIGNED_IN" && session) {
+      navigate("/", { replace: true });
+    }
   }, [updateUserFromSession, navigate]);
 
   useEffect(() => {
@@ -60,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeAuth();
-    
+
     return () => {
       mounted = false;
       unsubscribe?.();
@@ -82,7 +89,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email : string, password : string) => {
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'http://localhost:5173/auth/v1/callback',
+          queryParams: {
+            prompt: 'select_account',
+          },
+        },
+        
+      });
+
+      if (error) {
+        console.error('Google OAuth login error:', error);
+        throw error;
+      }
+
+    } catch (error) {
+      console.error("Error with Google OAuth:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  async function signInWithGithub() {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: 'http://localhost:5173/auth/v1/callback',
+          queryParams: {
+            allow_signup: 'true', 
+            prompt: 'consent', 
+          },
+        },
+      });
+  
+      if (error) {
+        console.error('GitHub OAuth login error:', error);
+        throw error;
+      }
+      
+      // If we get here, the OAuth flow has started successfully
+      // The user will be redirected to GitHub for authentication
+      // After successful authentication, they will be redirected back to the callback URL
+  
+    } catch (error) {
+      console.error("Error with GitHub OAuth:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+  const signUp = async (email: string, password: string) => {
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signUp({ email, password });
@@ -113,7 +179,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut , signUp }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signOut, signUp, handleLogin, signInWithGithub ,updateUserFromSession}}>
+
       {children}
     </AuthContext.Provider>
   );

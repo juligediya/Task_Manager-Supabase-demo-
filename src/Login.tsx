@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -17,8 +17,8 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, loading } = useAuth();
-  
+  const { signIn, loading, handleLogin,signInWithGithub } = useAuth();
+
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,14 +30,24 @@ export function LoginPage() {
       await signIn(email, password);
     } catch (error: any) {
       toast.error(
-         "Error",{
+        "Error", {
         description: error?.message || "Invalid credentials",
-       
+
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const goggleLogin=async()=>{
+    await handleLogin()
+    
+
+  }
+
+  const githubLogin=async()=>{
+    await signInWithGithub()
+  }
 
   if (loading) return <LoadingSpinner />;
 
@@ -45,7 +55,7 @@ export function LoginPage() {
     <div className="flex items-center justify-center min-h-screen ">
       <Card className="w-[400px] shadow-lg border-border">
         <CardHeader className="space-y-4 pb-2">
-      
+
           <CardTitle className="text-center text-2xl font-bold text-foreground">
             Login
           </CardTitle>
@@ -68,7 +78,7 @@ export function LoginPage() {
                 autoComplete="email"
               />
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Password</label>
               <div className="relative">
@@ -92,8 +102,8 @@ export function LoginPage() {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200"
               disabled={isSubmitting}
             >
@@ -104,12 +114,28 @@ export function LoginPage() {
                 </>
               ) : 'Sign In'}
             </Button>
-            <div className="flex items-center justify-center"> 
-                <a href="/signup" className="text-sm text-black-800 hover:underline">
+            <div className="flex items-center justify-center">
+              <a href="/signup" className="text-sm text-black-800 hover:underline">
                 Don't have an account? Sign Up
-                </a>
-                </div>
+              </a>
+            </div>
           </form>
+
+          <div className=" w-full">
+         
+            <div>
+              <Button onClick={goggleLogin} className="w-full h-11 mb-3
+              ">
+                <img src='/Google__G__logo.svg.png' alt='' height={20} width={20}/>Sign in with Google
+              </Button>
+            </div>
+
+            <div>
+              <Button onClick={githubLogin} className="w-full h-11 ">
+              Sign in with GitHub
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

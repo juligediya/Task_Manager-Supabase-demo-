@@ -7,6 +7,7 @@ import Tasks from './Task'
 import { SignupPage } from './SignUp'
 import UnprotectedRoute from './UnprotectedRoute'
 import ProtectedRoute from './ProtectedRoute'
+import AuthCallback from './AuthCallback'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route element={<UnprotectedRoute />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/auth/v1/callback" element={<AuthCallback />} />
           </Route>
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Tasks />} />
